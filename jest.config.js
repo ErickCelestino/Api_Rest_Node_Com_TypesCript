@@ -7,12 +7,13 @@ module.exports = {
     testEnviroment:'node',
     clearMocks: true,
     present: 'ts-jest',
-    moduleNameMapper: {
-        '@src/(.*)': '<rootDir>/src/$1',
-        '@test/(.*)': '<rootDir>/src/test/$1',
-    },
     transform: {
       '^.+\\.ts?$': 'ts-jest',
     },
     transformIgnorePatterns: ['<rootDir>/node_modules/'],
+    moduleNameMapper: {
+        '@src/(.*)': '<rootDir>/src/$1',
+        '@test/(.*)': '<rootDir>/test/$1',
+    },
+
 };
