@@ -11,4 +11,8 @@ module.exports = {
         '@src/(.*)': '<rootDir>/src/$1',
         '@test/(.*)': '<rootDir>/src/test/$1',
     },
+    transform: {
+      '^.+\\.ts?$': 'ts-jest',
+    },
+    transformIgnorePatterns: ['<rootDir>/node_modules/'],
 };

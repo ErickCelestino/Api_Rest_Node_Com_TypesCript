@@ -1,7 +1,6 @@
-// import supertest from "supertest";
-// import { SetupServer } from "@src/server";
-const supertest = require('supertest');
-const SetupServer = require('@src/server');
+import supertest from "supertest";
+ import { SetupServer } from "@src/server";
+
 
 beforeAll(() => {
   const server = new SetupServer();
