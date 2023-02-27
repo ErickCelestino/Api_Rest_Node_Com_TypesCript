@@ -1,4 +1,5 @@
-import { AxiosStatic } from "axios";
+import axios ,{ AxiosError, AxiosStatic } from "axios";
+import { InternalError } from '@src/util/errors/internal-errors';
 
 export interface stormGLassPointSource {
     [key:string]: number;
@@ -31,6 +32,22 @@ export interface ForecastPoint {
     windSpeed: number;
 }
 
+export class ClientRequestError extends InternalError {
+    constructor(message: string) {
+        const internalMessage = 
+        'Unexpected error when trying to communicate to StormGlass';
+        super(`${internalMessage}: ${message}`);
+    }
+}
+
+export class StormGlassReponseError extends InternalError {
+    constructor(message: string){
+        const internalMessage = 
+        'Unexpected error returned by the StormGlass service';
+        super(`${internalMessage}: ${message}`);
+    }
+}
+
 export class StormGlass {
     readonly stormGlassApiParams =  
     'swellDirection,swellHeight,swellPeriod,waveDirection,waveHeight,windDirection,windSpeed';
@@ -39,7 +56,8 @@ export class StormGlass {
     constructor(protected resquest: AxiosStatic ){}
 
     public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]>{
-        const response =  this.resquest.get<StormGlassForecastResponse>(
+        try{
+        const response =  await this.resquest.get<StormGlassForecastResponse>(
             `https://api.stormglass.io/v2/weather/point?lat=${lat}&lng=${lng}&params=${this.stormGlassApiParams}&source=${this.stormGlassApiSource}`,
             {
                 headers: {
@@ -48,6 +66,19 @@ export class StormGlass {
             }
         );
         return this.normalizeResponse((await response).data);
+        }catch(err){
+            const axiosError = err as AxiosError;
+            if(
+                axiosError instanceof Error &&
+                axiosError.response &&
+                axiosError.response.status
+            ){
+                throw new StormGlassReponseError(
+                    `Error: ${JSON.stringify(axiosError.response.data)} Code: ${axiosError.response.status}`
+                );
+            }
+            throw new ClientRequestError((err as {message: any}).message);   
+        }
     }
 
     private normalizeResponse(
